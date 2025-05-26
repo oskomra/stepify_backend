@@ -2,17 +2,17 @@ package pl.pjatk.Stepify.user.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.pjatk.Stepify.exception.ResourceNotFoundException;
 import pl.pjatk.Stepify.exception.UnauthorizedAccessException;
 import pl.pjatk.Stepify.user.advice.UserAlreadyExistsException;
-import pl.pjatk.Stepify.user.dto.JwtResponseDTO;
 import pl.pjatk.Stepify.user.dto.LoginRequestDTO;
 import pl.pjatk.Stepify.user.mapper.UserMapper;
 import pl.pjatk.Stepify.user.model.User;
@@ -46,7 +46,7 @@ public class UserService {
         }
     }
 
-    public void authenticate(LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+    public UserDTO authenticate(LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
         Authentication authentication =
                 authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -66,6 +66,15 @@ public class UserService {
                  .build();
             response.addHeader("Set-Cookie", cookie.toString());
             //  return jwtService.generateToken(loginRequestDTO.getEmail());
+
+            User user = userRepository.findUserByEmail(loginRequestDTO.getEmail())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+
+            UserDTO userDTO = userMapper.userToUserDTO(user);
+
+            return userDTO;
+
         } else {
             throw new UnauthorizedAccessException("Invalid email or password");
         }
@@ -86,6 +95,26 @@ public class UserService {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public UserDTO getUserDTO() {
+        return userMapper.userToUserDTO(getCurrentUser());
+    }
+
+    public UserDTO updateUser(UserDTO userDTO) {
+        User user = userRepository.findUserByEmail(userDTO.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!user.getEmail().equals(userDTO.getEmail())) {
+            throw new UnauthorizedAccessException("Invalid email or password");
+        } else {
+            user.setName(userDTO.getName());
+            user.setLastName(userDTO.getLastName());
+            user.setPhone(userDTO.getPhone());
+            user.setEmail(userDTO.getEmail());
+        }
+
+        return userMapper.userToUserDTO(userRepository.save(user));
     }
 
 

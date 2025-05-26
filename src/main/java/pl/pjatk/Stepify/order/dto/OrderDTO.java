@@ -19,7 +19,7 @@ public class OrderDTO {
     private long userId;
     private List<OrderItemDTO> orderItems;
     private double totalPrice;
-    private List<AddressDTO> availableAddresses;
+    private AddressDTO address;
     private LocalDateTime orderDate;
     private OrderStatus status;
     private DeliveryMethod deliveryMethod;

@@ -5,14 +5,12 @@ import org.springframework.stereotype.Service;
 import pl.pjatk.Stepify.cart.model.Cart;
 import pl.pjatk.Stepify.cart.repository.CartRepository;
 import pl.pjatk.Stepify.exception.ResourceNotFoundException;
-import pl.pjatk.Stepify.exception.UnauthorizedAccessException;
 import pl.pjatk.Stepify.order.dto.OrderDTO;
 import pl.pjatk.Stepify.order.dto.OrderSummaryDTO;
 import pl.pjatk.Stepify.order.mapper.OrderMapper;
 import pl.pjatk.Stepify.order.model.*;
 import pl.pjatk.Stepify.order.repository.OrderRepository;
 import pl.pjatk.Stepify.user.mapper.AddressMapper;
-import pl.pjatk.Stepify.user.model.Address;
 import pl.pjatk.Stepify.user.model.User;
 import pl.pjatk.Stepify.user.repository.AddressRepository;
 import pl.pjatk.Stepify.user.service.UserService;
@@ -58,12 +56,8 @@ public class OrderService {
         );
         orderItems.forEach(orderItem -> {orderItem.setOrder(order);});
 
-        OrderDTO orderDTO = orderMapper.mapOrderToOrderDTO(order);
-        List<Address> userAddresses = addressRepository.findByUserId(user.getId());
-        orderDTO.setAvailableAddresses(addressMapper.mapListAddressToAddressDTO(userAddresses));
 
-
-        return orderDTO;
+        return orderMapper.mapOrderToOrderDTO(order);
     }
 
     public OrderSummaryDTO placeOrder(Order order) {
@@ -73,6 +67,13 @@ public class OrderService {
         order.setUser(user);
         order.setStatus(OrderStatus.CONFIRMED);
         order.setOrderDate(LocalDateTime.now());
+        order.setShippingAddress(order.getShippingAddress());
+
+        if (order.getDeliveryMethod().equals(DeliveryMethod.COURIER)) {
+            order.setTotalPrice(order.getTotalPrice() + 10.0);
+        } else if (order.getDeliveryMethod().equals(DeliveryMethod.INPOST_PARCEL)) {
+            order.setTotalPrice(order.getTotalPrice() + 5.0);
+        }
 
         orderRepository.save(order);
 

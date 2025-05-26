@@ -11,6 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AddressDTO {
 
+    private long id;
     private String street;
     private String city;
     private String postalCode;
