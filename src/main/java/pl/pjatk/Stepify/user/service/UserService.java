@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import pl.pjatk.Stepify.exception.ResourceNotFoundException;
 import pl.pjatk.Stepify.exception.UnauthorizedAccessException;
 import pl.pjatk.Stepify.user.advice.UserAlreadyExistsException;
+import pl.pjatk.Stepify.user.dto.AuthResponseDTO;
 import pl.pjatk.Stepify.user.dto.LoginRequestDTO;
 import pl.pjatk.Stepify.user.mapper.UserMapper;
 import pl.pjatk.Stepify.user.model.User;
@@ -38,7 +39,7 @@ public class UserService {
                     userDTO.getLastName(),
                     userDTO.getPhone(),
                     passwordEncoder.encode(userDTO.getPassword()),
-                    "ROLE_REGISTERED"
+                    "ROLE_USER"
             );
             userRepository.save(user);
         } else {
@@ -46,7 +47,7 @@ public class UserService {
         }
     }
 
-    public UserDTO authenticate(LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+    public AuthResponseDTO authenticate(LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
         Authentication authentication =
                 authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -65,7 +66,6 @@ public class UserService {
                     .maxAge(24 * 60 * 60)
                  .build();
             response.addHeader("Set-Cookie", cookie.toString());
-            //  return jwtService.generateToken(loginRequestDTO.getEmail());
 
             User user = userRepository.findUserByEmail(loginRequestDTO.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -73,7 +73,7 @@ public class UserService {
 
             UserDTO userDTO = userMapper.userToUserDTO(user);
 
-            return userDTO;
+            return new AuthResponseDTO(token, userDTO);
 
         } else {
             throw new UnauthorizedAccessException("Invalid email or password");

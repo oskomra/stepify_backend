@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.pjatk.Stepify.user.dto.AuthResponseDTO;
 import pl.pjatk.Stepify.user.dto.LoginRequestDTO;
 import pl.pjatk.Stepify.user.dto.UserDTO;
 import pl.pjatk.Stepify.user.service.UserService;
@@ -23,7 +24,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    ResponseEntity<UserDTO> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
+    ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
 
         return ResponseEntity.ok(userService.authenticate(loginRequestDTO, response));
     }

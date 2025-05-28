@@ -27,4 +27,5 @@ public class OrderSummaryDTO {
     private OrderStatus status;
     private DeliveryMethod deliveryMethod;
     private DeliveryCompany deliveryCompany;
+    private String parcelLockerId;
 }

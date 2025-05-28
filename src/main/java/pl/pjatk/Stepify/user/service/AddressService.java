@@ -21,11 +21,11 @@ public class AddressService {
     private final AddressMapper addressMapper;
     private final UserService userService;
 
-    public List<AddressDTO> getAddresses(){
-        if(addressRepository.findAll().isEmpty()){
-            throw new ResourceNotFoundException("No address found");
+    public List<AddressDTO> getAddresses(long id){
+        if(addressRepository.findByUserId(id).isEmpty()){
+            throw new ResourceNotFoundException("No addresses found");
         } else {
-            return addressRepository.findAll()
+            return addressRepository.findByUserId(id)
                     .stream()
                     .map(addressMapper::mapAddressToAddressDTO)
                     .collect(Collectors.toList());

@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/users/**").permitAll()
                         .requestMatchers("/user/**").permitAll()
                         .requestMatchers("/addresses/**").permitAll()
+                        .requestMatchers("/cart").hasRole("USER")
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
                 .cors(Customizer.withDefaults())

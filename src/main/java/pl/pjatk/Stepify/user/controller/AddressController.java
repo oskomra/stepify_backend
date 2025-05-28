@@ -14,9 +14,9 @@ public class AddressController {
 
     private final AddressService addressService;
 
-    @GetMapping("/addresses")
-    public ResponseEntity<List<AddressDTO>> getAddresses(){
-        return ResponseEntity.ok(addressService.getAddresses());
+    @GetMapping("/addresses/{id}")
+    public ResponseEntity<List<AddressDTO>> getAddresses(@PathVariable long id){
+        return ResponseEntity.ok(addressService.getAddresses(id));
     }
 
     @PostMapping("/addresses")

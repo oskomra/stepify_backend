@@ -14,6 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserDTO {
 
+    private long id;
     @Email
     @NotBlank(message = "Email is required")
     private String email;

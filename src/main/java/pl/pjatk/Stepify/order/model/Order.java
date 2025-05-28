@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import pl.pjatk.Stepify.payment.model.Payment;
 import pl.pjatk.Stepify.user.model.User;
 
 import java.time.LocalDateTime;
@@ -45,6 +46,11 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     private DeliveryCompany deliveryCompany;
+
+    private String parcelLockerId;
+
+    @OneToOne(mappedBy = "order")
+    private Payment payment;
 
     public Order(List<OrderItem> orderItems, double totalPrice) {
         this.orderItems = orderItems;
