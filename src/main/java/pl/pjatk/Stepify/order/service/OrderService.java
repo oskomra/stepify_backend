@@ -5,11 +5,14 @@ import org.springframework.stereotype.Service;
 import pl.pjatk.Stepify.cart.model.Cart;
 import pl.pjatk.Stepify.cart.repository.CartRepository;
 import pl.pjatk.Stepify.exception.ResourceNotFoundException;
+import pl.pjatk.Stepify.exception.UnauthorizedAccessException;
 import pl.pjatk.Stepify.order.dto.OrderDTO;
 import pl.pjatk.Stepify.order.dto.OrderSummaryDTO;
 import pl.pjatk.Stepify.order.mapper.OrderMapper;
 import pl.pjatk.Stepify.order.model.*;
 import pl.pjatk.Stepify.order.repository.OrderRepository;
+import pl.pjatk.Stepify.payment.model.Payment;
+import pl.pjatk.Stepify.payment.model.PaymentStatus;
 import pl.pjatk.Stepify.user.mapper.AddressMapper;
 import pl.pjatk.Stepify.user.model.User;
 import pl.pjatk.Stepify.user.repository.AddressRepository;
@@ -60,14 +63,16 @@ public class OrderService {
         return orderMapper.mapOrderToOrderDTO(order);
     }
 
-    public OrderSummaryDTO placeOrder(Order order) {
+    public OrderSummaryDTO placeOrder(OrderDTO orderDTO) {
 
         User user = userService.getCurrentUser();
 
+        Order order = orderMapper.mapOrderDTOToOrder(orderDTO);
         order.setUser(user);
-        order.setStatus(OrderStatus.CONFIRMED);
         order.setOrderDate(LocalDateTime.now());
-        order.setShippingAddress(order.getShippingAddress());
+        order.setStatus(OrderStatus.PENDING);
+        order.setPayment(new Payment(orderDTO.getPayment().getPaymentMethod(), orderDTO.getTotalPrice(), PaymentStatus.PENDING, order));
+
 
         if (order.getDeliveryMethod().equals(DeliveryMethod.COURIER)) {
             order.setTotalPrice(order.getTotalPrice() + 10.0);
@@ -88,5 +93,17 @@ public class OrderService {
                 .stream()
                 .map(orderMapper::mapOrderToOrderDTO)
                 .collect(Collectors.toList());
+    }
+
+    public OrderDTO getOrderById(long id) {
+        User user = userService.getCurrentUser();
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (order.getUser().getId() != user.getId()) {
+            throw new UnauthorizedAccessException("You do not have permission to access this order");
+        } else {
+            return orderMapper.mapOrderToOrderDTO(order);
+        }
     }
 }

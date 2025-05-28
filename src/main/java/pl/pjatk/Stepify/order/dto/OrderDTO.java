@@ -4,6 +4,7 @@ import lombok.*;
 import pl.pjatk.Stepify.order.model.DeliveryCompany;
 import pl.pjatk.Stepify.order.model.DeliveryMethod;
 import pl.pjatk.Stepify.order.model.OrderStatus;
+import pl.pjatk.Stepify.payment.dto.PaymentDTO;
 import pl.pjatk.Stepify.user.dto.AddressDTO;
 
 import java.time.LocalDateTime;
@@ -19,11 +20,12 @@ public class OrderDTO {
     private long userId;
     private List<OrderItemDTO> orderItems;
     private double totalPrice;
-    private AddressDTO address;
+    private AddressDTO shippingAddress;
     private LocalDateTime orderDate;
     private OrderStatus status;
     private DeliveryMethod deliveryMethod;
     private DeliveryCompany deliveryCompany;
     private String parcelLockerId;
+    private PaymentDTO payment;
 
 }
