@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.pjatk.Stepify.payment.model.PaymentMethod;
+import pl.pjatk.Stepify.payment.model.PaymentStatus;
 
 import java.time.LocalDateTime;
 
@@ -12,13 +13,12 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PaymentRequestDTO {
+public class PaymentDTO {
 
-    private PaymentMethod method;
+    private Long id;
+    private PaymentMethod paymentMethod;
     private double amount;
     private LocalDateTime paymentDate;
-    private String cardNumber;
-    private String cardExpiry;
-    private String cardCvv;
-    private String blikCode;
+    private PaymentStatus paymentStatus;
+    private String transactionId;
 }

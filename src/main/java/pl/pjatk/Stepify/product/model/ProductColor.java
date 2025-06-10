@@ -29,6 +29,7 @@ public class ProductColor {
     private Product product;
 
     @OneToMany(mappedBy = "productColor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("size ASC")
     @JsonManagedReference
     private List<ProductSize> sizes;
 

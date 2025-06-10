@@ -1,6 +1,7 @@
 package pl.pjatk.Stepify.product.dto.productSize;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
@@ -12,7 +13,8 @@ import lombok.*;
 public class ProductSizeUpdateDTO {
 
     private long id;
-    @Positive(message = "Size must be greater than zero")
+    @Min(value = 36, message = "Size must be at least 36")
+    @Max(value = 48, message = "Size cannot be above 48")
     private Double size;
 
     @Min(value = 0, message = "Stock cannot be negative")

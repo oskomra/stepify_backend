@@ -19,16 +19,23 @@ public class Payment {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private PaymentMethod method;
+    private PaymentStatus paymentStatus;
     private double amount;
     private LocalDateTime paymentDate;
-    private String cardNumber;
-    private String cardExpiry;
-    private String cardCvv;
-    private String blikCode;
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
+    private String transactionId;
 
     @OneToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
+    public Payment(PaymentMethod paymentMethod, double amount, PaymentStatus paymentStatus, Order order) {
+        this.paymentMethod = paymentMethod;
+        this.amount = amount;
+        this.order = order;
+        this.paymentStatus = paymentStatus;
+    }
+
 
 }

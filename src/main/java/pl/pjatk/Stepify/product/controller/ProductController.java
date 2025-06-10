@@ -56,6 +56,14 @@ public class ProductController {
         return ResponseEntity.ok(productService.patchProductById(id, productUpdateDTO));
     }
 
+    @GetMapping("/products/stock/{id}")
+    public ResponseEntity<Integer> getProductStockById(
+            @PathVariable Long id,
+            @RequestParam String color,
+            @RequestParam double size) {
+        return ResponseEntity.ok(productService.getProductStockById(id, color, size));
+    }
+
 
 
 }

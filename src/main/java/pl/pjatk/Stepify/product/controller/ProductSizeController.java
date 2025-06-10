@@ -34,7 +34,7 @@ public class ProductSizeController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<ProductSizeDTO> addProductSizeById(@PathVariable long id, @RequestBody ProductSizeCreateDTO productSizeCreateDTO) {
+    public ResponseEntity<ProductSizeDTO> addProductSizeById(@PathVariable long id,@Valid @RequestBody ProductSizeCreateDTO productSizeCreateDTO) {
         return ResponseEntity.ok(productSizeService.addProductSizeById(id, productSizeCreateDTO));
     }
 

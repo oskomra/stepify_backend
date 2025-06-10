@@ -49,7 +49,7 @@ public class Order {
 
     private String parcelLockerId;
 
-    @OneToOne(mappedBy = "order")
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
 
     public Order(List<OrderItem> orderItems, double totalPrice) {
