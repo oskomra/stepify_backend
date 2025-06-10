@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import pl.pjatk.Stepify.cart.dto.CartDTO;
 import pl.pjatk.Stepify.cart.dto.CartItemDTO;
 import pl.pjatk.Stepify.cart.dto.RequestColorAndSizeDTO;
+import pl.pjatk.Stepify.cart.exception.OutOfStockException;
 import pl.pjatk.Stepify.cart.mapper.CartItemMapper;
 import pl.pjatk.Stepify.cart.mapper.CartMapper;
 import pl.pjatk.Stepify.cart.model.Cart;
@@ -16,7 +18,10 @@ import pl.pjatk.Stepify.cart.repository.CartRepository;
 import pl.pjatk.Stepify.exception.ResourceNotFoundException;
 import pl.pjatk.Stepify.exception.UnauthorizedAccessException;
 import pl.pjatk.Stepify.product.model.Product;
+import pl.pjatk.Stepify.product.model.ProductColor;
+import pl.pjatk.Stepify.product.model.ProductSize;
 import pl.pjatk.Stepify.product.repository.ProductRepository;
+import pl.pjatk.Stepify.product.service.ProductService;
 import pl.pjatk.Stepify.user.model.User;
 import pl.pjatk.Stepify.user.service.UserService;
 
@@ -32,6 +37,7 @@ public class CartService {
     private final UserService userService;
     private final CartMapper cartMapper;
     private final CartItemMapper cartItemMapper;
+    private final ProductService productService;
 
 
     public CartDTO getCart() {
@@ -40,6 +46,18 @@ public class CartService {
                 cartRepository.findCartByUserId(currentUser.getId())
                         .orElseGet(() -> cartRepository.save(new Cart(currentUser)))
         );
+    }
+
+    @Transactional
+    public CartDTO clearCart() {
+        User currentUser = userService.getCurrentUser();
+        Cart cart = cartRepository.findCartByUserId(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+
+        cart.getCartItems().clear();
+        cart.recalculateTotalPrice();
+
+        return cartMapper.mapCartToCartDTO(cartRepository.save(cart)); // persist changes
     }
 
     public CartItemDTO addItem(String brandName, String modelName, RequestColorAndSizeDTO colorAndSize) {
@@ -56,9 +74,17 @@ public class CartService {
         }
 
         if (isItemInCart(cart, product, colorAndSize.getColor(), colorAndSize.getSize())) {
-            increaseQuantityForItem(cart, product, colorAndSize.getColor(), colorAndSize.getSize());
+            if (isQuantityValid(product, colorAndSize.getColor(), colorAndSize.getSize(), 1)) {
+                increaseQuantityForItem(cart, product, colorAndSize.getColor(), colorAndSize.getSize());
+            } else {
+                throw new OutOfStockException("Only " + productService.getAvailableStock(product, colorAndSize.getColor(), colorAndSize.getSize()) + " items left in stock");
+            }
         } else {
-            cart.getCartItems().add(newCartItem);
+            if (isQuantityValid(product, colorAndSize.getColor(), colorAndSize.getSize(), 1)) {
+                cart.getCartItems().add(newCartItem);
+            } else {
+                throw new OutOfStockException("Only " + productService.getAvailableStock(product, colorAndSize.getColor(), colorAndSize.getSize()) + " items left in stock");
+            }
         }
 
         cart.recalculateTotalPrice();
@@ -87,8 +113,12 @@ public class CartService {
         CartItem item = getCartItemForCurrentUser(id);
         Cart cart = item.getCart();
 
-        item.setQuantity(quantity);
-        cart.recalculateTotalPrice();
+        if (isQuantityValid(item.getProduct(), item.getColor(), item.getSize(), quantity)) {
+            item.setQuantity(quantity);
+            cart.recalculateTotalPrice();
+        } else {
+            throw new OutOfStockException("Only " + productService.getAvailableStock(item.getProduct(), item.getColor(), item.getSize()) + " items left in stock");
+        }
 
         return cartMapper.mapCartToCartDTO(cartRepository.save(cart));
     }
@@ -108,7 +138,12 @@ public class CartService {
     private void increaseQuantityForItem(Cart cart, Product product, String color, double size) {
         for (CartItem item : cart.getCartItems()) {
             if (item.getProduct().getId() == product.getId() && item.getColor().equals(color) && item.getSize() == size) {
-                item.setQuantity(item.getQuantity() + 1);
+                int newQuantity = item.getQuantity() + 1;
+                if (isQuantityValid(product, color, size, newQuantity)) {
+                    item.setQuantity(item.getQuantity() + 1);
+                } else {
+                    throw new OutOfStockException("Only " + productService.getAvailableStock(product, color, size) + " items left in stock");
+                }
             }
         }
     }
@@ -143,5 +178,15 @@ public class CartService {
                         .anyMatch(s -> s.getSize() == size));
     }
 
+    private boolean isQuantityValid(Product product, String color, double size, int quantity) {
+        return product.getColors()
+                .stream()
+                .filter(c -> c.getColor().equalsIgnoreCase(color))
+                .flatMap(c -> c.getSizes().stream())
+                .filter(s -> s.getSize() == size)
+                .findFirst()
+                .map(s -> quantity <= s.getStock())
+                .orElse(false); // return false if no matching size is found
+    }
 
 }

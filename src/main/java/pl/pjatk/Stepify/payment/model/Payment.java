@@ -19,10 +19,11 @@ public class Payment {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    private PaymentStatus paymentStatus;
     private double amount;
     private LocalDateTime paymentDate;
-    private PaymentStatus paymentStatus;
+    @Enumerated(EnumType.STRING)
+    private PaymentMethod paymentMethod;
     private String transactionId;
 
     @OneToOne

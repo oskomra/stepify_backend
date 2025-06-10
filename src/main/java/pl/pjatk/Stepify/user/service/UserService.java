@@ -20,6 +20,9 @@ import pl.pjatk.Stepify.user.model.User;
 import pl.pjatk.Stepify.user.dto.UserDTO;
 import pl.pjatk.Stepify.user.repository.UserRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -115,6 +118,26 @@ public class UserService {
         }
 
         return userMapper.userToUserDTO(userRepository.save(user));
+    }
+
+    public UserDTO getUserById(long id) {
+        return userMapper.userToUserDTO(userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found")));
+    }
+
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::userToUserDTO)
+                .collect(Collectors.toList());
+    }
+
+    public void deleteUser(long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("User not found");
+        } else {
+            userRepository.deleteById(id);
+        }
     }
 
 

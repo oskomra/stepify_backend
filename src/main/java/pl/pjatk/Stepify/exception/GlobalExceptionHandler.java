@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<CustomErrorMessage> handleInputArgumentNotValid(MethodArgumentNotValidException e) {
         StringBuilder errorMessage = new StringBuilder();
         e.getBindingResult().getFieldErrors().forEach(error ->
-                errorMessage.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ")
+                errorMessage.append(error.getDefaultMessage()).append("\n")
         );
         return new ResponseEntity<>(new CustomErrorMessage(errorMessage.toString()), HttpStatus.BAD_REQUEST);
     }

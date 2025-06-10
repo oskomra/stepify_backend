@@ -8,9 +8,11 @@ import pl.pjatk.Stepify.product.dto.productSize.ProductSizeCreateDTO;
 import pl.pjatk.Stepify.product.dto.productSize.ProductSizeDTO;
 import pl.pjatk.Stepify.product.dto.productSize.ProductSizeUpdateDTO;
 import pl.pjatk.Stepify.product.mappers.ProductSizeMapper;
+import pl.pjatk.Stepify.product.model.Product;
 import pl.pjatk.Stepify.product.model.ProductColor;
 import pl.pjatk.Stepify.product.model.ProductSize;
 import pl.pjatk.Stepify.product.repository.ProductColorRepository;
+import pl.pjatk.Stepify.product.repository.ProductRepository;
 import pl.pjatk.Stepify.product.repository.ProductSizeRepository;
 
 @Service
@@ -20,6 +22,7 @@ public class ProductSizeService {
     private final ProductSizeRepository productSizeRepository;
     private final ProductSizeMapper productSizeMapper;
     private final ProductColorRepository productColorRepository;
+    private final ProductRepository productRepository;
 
     public ProductSizeDTO findProductSizeById(long id) {
         ProductSize productSize = productSizeRepository.findById(id)
@@ -65,6 +68,8 @@ public class ProductSizeService {
         productSizeRepository.save(productSize);
         return productSizeMapper.toDto(productSize);
     }
+
+
 
 
 }

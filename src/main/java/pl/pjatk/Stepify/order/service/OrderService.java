@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pl.pjatk.Stepify.cart.model.Cart;
 import pl.pjatk.Stepify.cart.repository.CartRepository;
+import pl.pjatk.Stepify.cart.service.CartService;
 import pl.pjatk.Stepify.exception.ResourceNotFoundException;
 import pl.pjatk.Stepify.exception.UnauthorizedAccessException;
 import pl.pjatk.Stepify.order.dto.OrderDTO;
@@ -28,10 +29,9 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
-    private final AddressRepository addressRepository;
     private final UserService userService;
     private final OrderMapper orderMapper;
-    private final AddressMapper addressMapper;
+    private final CartService cartService;
 
     public OrderDTO order() {
         User user = userService.getCurrentUser();
@@ -70,17 +70,18 @@ public class OrderService {
         Order order = orderMapper.mapOrderDTOToOrder(orderDTO);
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(OrderStatus.AWAITING_PAYMENT);
         order.setPayment(new Payment(orderDTO.getPayment().getPaymentMethod(), orderDTO.getTotalPrice(), PaymentStatus.PENDING, order));
 
 
         if (order.getDeliveryMethod().equals(DeliveryMethod.COURIER)) {
             order.setTotalPrice(order.getTotalPrice() + 10.0);
-        } else if (order.getDeliveryMethod().equals(DeliveryMethod.INPOST_PARCEL)) {
+        } else if (order.getDeliveryMethod().equals(DeliveryMethod.PARCEL)) {
             order.setTotalPrice(order.getTotalPrice() + 5.0);
         }
 
         orderRepository.save(order);
+        cartService.clearCart();
 
         return orderMapper.mapOrderToOrderSummaryDTO(orderRepository.save(order));
     }

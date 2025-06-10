@@ -10,6 +10,8 @@ import pl.pjatk.Stepify.user.dto.LoginRequestDTO;
 import pl.pjatk.Stepify.user.dto.UserDTO;
 import pl.pjatk.Stepify.user.service.UserService;
 
+import java.util.List;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -44,4 +46,22 @@ public class UserController {
     ResponseEntity<UserDTO> updateUser(@RequestBody UserDTO userDTO) {
         return ResponseEntity.ok(userService.updateUser(userDTO));
     }
+
+    @DeleteMapping("/user/{id}")
+    ResponseEntity<Void> deleteUser(@PathVariable long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/user/{id}")
+    ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+
+    }
+
+    @GetMapping("/users")
+    ResponseEntity<List<UserDTO>> getUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
 }

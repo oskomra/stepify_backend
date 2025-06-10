@@ -2,10 +2,13 @@ package pl.pjatk.Stepify.product.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
+import org.hibernate.engine.jdbc.Size;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import pl.pjatk.Stepify.cart.exception.OutOfStockException;
 import pl.pjatk.Stepify.exception.ResourceAlreadyExistsException;
 import pl.pjatk.Stepify.exception.ResourceNotFoundException;
+import pl.pjatk.Stepify.order.model.OrderItem;
 import pl.pjatk.Stepify.product.dto.product.ProductCreateDTO;
 import pl.pjatk.Stepify.product.dto.product.ProductDTO;
 import pl.pjatk.Stepify.product.dto.productColor.ProductColorCreateDTO;
@@ -20,13 +23,16 @@ import pl.pjatk.Stepify.product.model.ProductColor;
 import pl.pjatk.Stepify.product.model.ProductFilter;
 import pl.pjatk.Stepify.product.model.ProductSize;
 import pl.pjatk.Stepify.product.repository.ProductRepository;
+import pl.pjatk.Stepify.product.repository.ProductSizeRepository;
 import pl.pjatk.Stepify.product.repository.ProductSpecification;
 
+import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +45,7 @@ public class ProductService {
     private final ProductSizeMapper productSizeMapper;
     private final ProductSizeService productSizeService;
     private final ProductColorService productColorService;
+    private final ProductSizeRepository productSizeRepository;
 
     public List<ProductDTO> getProducts() {
         return productRepository.findAll()
@@ -129,6 +136,74 @@ public class ProductService {
         }
         productRepository.save(product);
         return productMapper.toDto(product);
+    }
+
+    public int getProductStockById(long productId, String color, double size) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product with id " + productId + " not found"));
+
+        ProductColor productColor = product.getColors().stream()
+                .filter(c -> c.getColor().equalsIgnoreCase(color))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Color " + color + " not found for product id " + productId));
+
+        ProductSize productSize = productColor.getSizes().stream()
+                .filter(s -> s.getSize() == size)
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Size " + size + " not found for color " + color + " and product id " + productId));
+
+        return productSize.getStock();
+    }
+
+    public void updateProductStockOnOrder(List<OrderItem> orderedItems) {
+        orderedItems.forEach(orderItem -> {
+            productRepository.findProductByBrandNameAndModelName(orderItem.getBrandName(), orderItem.getModelName()).flatMap(product -> product.getColors().stream()
+                    .filter(color -> color.getColor().equalsIgnoreCase(orderItem.getColor()))
+                    .findFirst().flatMap(color -> color.getSizes().stream()
+                            .filter(s -> s.getSize() == orderItem.getSize())
+                            .findFirst())).ifPresent(colorSize -> {
+                                if (colorSize.getStock() >= orderItem.getQuantity()) {
+                                    colorSize.setStock(colorSize.getStock() - orderItem.getQuantity());
+                                    productSizeRepository.save(colorSize);
+                                } else {
+                                    throw new OutOfStockException(orderItem.getBrandName() + " " + orderItem.getModelName() + " is no longer in stock");
+                                }
+            });
+        });
+    }
+
+    public boolean isProductStockAvailableOnOrder(List<OrderItem> orderedItems) {
+        for (OrderItem orderItem : orderedItems) {
+            Optional<Product> productOpt = productRepository.findProductByBrandNameAndModelName(orderItem.getBrandName(), orderItem.getModelName());
+            if (productOpt.isEmpty()) return false;
+
+            Product product = productOpt.get();
+            Optional<ProductColor> colorOpt = product.getColors().stream()
+                    .filter(c -> c.getColor().equalsIgnoreCase(orderItem.getColor()))
+                    .findFirst();
+            if (colorOpt.isEmpty()) return false;
+
+            Optional<ProductSize> sizeOpt = colorOpt.get().getSizes().stream()
+                    .filter(s -> s.getSize() == orderItem.getSize())
+                    .findFirst();
+            if (sizeOpt.isEmpty()) return false;
+
+            if (sizeOpt.get().getStock() < orderItem.getQuantity()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public int getAvailableStock(Product product, String color, double size) {
+        return product.getColors()
+                .stream()
+                .filter(c -> c.getColor().equalsIgnoreCase(color))
+                .flatMap(c -> c.getSizes().stream())
+                .filter(s -> s.getSize() == size)
+                .findFirst()
+                .map(ProductSize::getStock)
+                .orElse(0);
     }
 
 

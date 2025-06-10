@@ -30,6 +30,7 @@ public class Product {
     private String description;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("color ASC")
     @JsonManagedReference("product-color")
     private List<ProductColor> colors;
 
