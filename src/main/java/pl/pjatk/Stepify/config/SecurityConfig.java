@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/payment").hasRole("USER")
                         .requestMatchers("/user").hasRole("USER")
                         .requestMatchers("/users").hasRole("USER")
+                        .requestMatchers("/promotions/**").hasRole("USER")
                         .anyRequest().authenticated())
                 .cors(Customizer.withDefaults())
                 .logout(logout -> logout

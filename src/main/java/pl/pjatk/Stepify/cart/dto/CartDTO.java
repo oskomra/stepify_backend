@@ -18,4 +18,6 @@ public class CartDTO {
 
     @Min(0)
     private double totalPrice;
+    private double discountTotal;
+    private double finalPrice;
 }

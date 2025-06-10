@@ -22,6 +22,9 @@ import pl.pjatk.Stepify.product.model.ProductColor;
 import pl.pjatk.Stepify.product.model.ProductSize;
 import pl.pjatk.Stepify.product.repository.ProductRepository;
 import pl.pjatk.Stepify.product.service.ProductService;
+import pl.pjatk.Stepify.promotion.dto.AppliedPromotionDTO;
+import pl.pjatk.Stepify.promotion.dto.ApplyPromotionDTO;
+import pl.pjatk.Stepify.promotion.service.PromotionService;
 import pl.pjatk.Stepify.user.model.User;
 import pl.pjatk.Stepify.user.service.UserService;
 
@@ -38,6 +41,7 @@ public class CartService {
     private final CartMapper cartMapper;
     private final CartItemMapper cartItemMapper;
     private final ProductService productService;
+    private final PromotionService promotionService;
 
 
     public CartDTO getCart() {
@@ -55,6 +59,7 @@ public class CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         cart.getCartItems().clear();
+        cart.getAppliedPromotions().clear();
         cart.recalculateTotalPrice();
 
         return cartMapper.mapCartToCartDTO(cartRepository.save(cart)); // persist changes
@@ -88,6 +93,11 @@ public class CartService {
         }
 
         cart.recalculateTotalPrice();
+
+        if (!cart.getAppliedPromotions().isEmpty()) {
+            cart = promotionService.recalculateCartPromotions(cart);
+        }
+
         cartRepository.save(cart);
 
         return cartItemMapper.mapCartItemToCartItemDTO(newCartItem);
@@ -100,6 +110,10 @@ public class CartService {
 
         cart.getCartItems().remove(item);
         cart.recalculateTotalPrice();
+
+        if (!cart.getAppliedPromotions().isEmpty()) {
+            cart = promotionService.recalculateCartPromotions(cart);
+        }
 
         return cartMapper.mapCartToCartDTO(cartRepository.save(cart));
     }
@@ -115,7 +129,12 @@ public class CartService {
 
         if (isQuantityValid(item.getProduct(), item.getColor(), item.getSize(), quantity)) {
             item.setQuantity(quantity);
+
             cart.recalculateTotalPrice();
+
+            if (!cart.getAppliedPromotions().isEmpty()) {
+                cart = promotionService.recalculateCartPromotions(cart);
+            }
         } else {
             throw new OutOfStockException("Only " + productService.getAvailableStock(item.getProduct(), item.getColor(), item.getSize()) + " items left in stock");
         }
@@ -187,6 +206,26 @@ public class CartService {
                 .findFirst()
                 .map(s -> quantity <= s.getStock())
                 .orElse(false); // return false if no matching size is found
+    }
+
+    @Transactional
+    public CartDTO applyPromotion(ApplyPromotionDTO applyPromotionDTO) {
+        User currentUser = userService.getCurrentUser();
+        Cart cart = cartRepository.findCartByUserId(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+
+        cart = promotionService.applyPromotion(applyPromotionDTO);
+        return cartMapper.mapCartToCartDTO(cart);
+    }
+
+    @Transactional
+    public CartDTO removePromotion(Long promotionId) {
+        User currentUser = userService.getCurrentUser();
+        Cart cart = cartRepository.findCartByUserId(currentUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+
+        cart = promotionService.removePromotion(promotionId);
+        return cartMapper.mapCartToCartDTO(cart);
     }
 
 }

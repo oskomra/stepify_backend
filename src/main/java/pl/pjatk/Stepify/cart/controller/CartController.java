@@ -37,5 +37,4 @@ public class CartController {
         return ResponseEntity.ok(cartService.updateItemQuantity(itemId, quantity));
     }
 
-
 }

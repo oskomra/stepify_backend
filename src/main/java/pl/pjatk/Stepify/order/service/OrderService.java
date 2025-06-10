@@ -14,6 +14,7 @@ import pl.pjatk.Stepify.order.model.*;
 import pl.pjatk.Stepify.order.repository.OrderRepository;
 import pl.pjatk.Stepify.payment.model.Payment;
 import pl.pjatk.Stepify.payment.model.PaymentStatus;
+import pl.pjatk.Stepify.promotion.service.PromotionService;
 import pl.pjatk.Stepify.user.mapper.AddressMapper;
 import pl.pjatk.Stepify.user.model.User;
 import pl.pjatk.Stepify.user.repository.AddressRepository;
@@ -32,6 +33,7 @@ public class OrderService {
     private final UserService userService;
     private final OrderMapper orderMapper;
     private final CartService cartService;
+    private final PromotionService promotionService;
 
     public OrderDTO order() {
         User user = userService.getCurrentUser();
@@ -72,6 +74,11 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(OrderStatus.AWAITING_PAYMENT);
         order.setPayment(new Payment(orderDTO.getPayment().getPaymentMethod(), orderDTO.getTotalPrice(), PaymentStatus.PENDING, order));
+
+        Cart cart = cartRepository.findCartByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+
+        promotionService.transferPromotionsToOrder(cart, order);
 
 
         if (order.getDeliveryMethod().equals(DeliveryMethod.COURIER)) {
