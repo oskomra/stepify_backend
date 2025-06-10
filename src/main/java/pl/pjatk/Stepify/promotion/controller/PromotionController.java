@@ -38,11 +38,7 @@ public class PromotionController {
 
     @PostMapping("/apply")
     public ResponseEntity<CartDTO> applyPromotion(@RequestBody ApplyPromotionDTO applyPromotionDTO) {
-        try {
-            return ResponseEntity.ok(cartService.applyPromotion(applyPromotionDTO));
-        } catch (InvalidPromotionException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok(cartService.applyPromotion(applyPromotionDTO));
     }
 
     @DeleteMapping("/{id}")
