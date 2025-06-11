@@ -30,4 +30,6 @@ public class UserDTO {
 
     @NotBlank(message = "password is required")
     private String password;
+
+    private String authority;
 }

@@ -103,6 +103,14 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    public List<OrderDTO> getAllOrders() {
+        return orderRepository
+                .findAll()
+                .stream()
+                .map(orderMapper::mapOrderToOrderDTO)
+                .collect(Collectors.toList());
+    }
+
     public OrderDTO getOrderById(long id) {
         User user = userService.getCurrentUser();
         Order order = orderRepository.findById(id)
