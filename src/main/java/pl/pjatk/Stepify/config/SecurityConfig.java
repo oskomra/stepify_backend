@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.OAuth2AuthenticationSuccessHandler;
 
 
 @Configuration
@@ -26,6 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/register").permitAll()
                         .requestMatchers(("/login")).permitAll()
                         .requestMatchers(("/logout")).permitAll()
+                        .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers(("/products/**")).permitAll()
                         .requestMatchers("/images/**").permitAll()
                         .requestMatchers("/colors/**").permitAll()
@@ -52,6 +55,12 @@ public class SecurityConfig {
                         .requestMatchers("/users").hasRole("ADMIN")
                         .requestMatchers("/promotions/**").permitAll()
                         .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .baseUri("/oauth2/authorize"))
+                        .redirectionEndpoint(endpoint -> endpoint
+                                .baseUri("/oauth2/callback/*"))
+                        .successHandler(oAuth2AuthenticationSuccessHandler))
                 .cors(Customizer.withDefaults())
                 .logout(logout -> logout
                         .logoutUrl("/logout")

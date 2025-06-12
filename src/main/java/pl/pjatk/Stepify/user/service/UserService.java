@@ -22,6 +22,7 @@ import pl.pjatk.Stepify.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 
 @Service
@@ -140,6 +141,19 @@ public class UserService {
         }
     }
 
-
+    public User findOrCreateGoogleUser(String email, String name, String lastName) {
+        return userRepository.findUserByEmail(email)
+                .orElseGet(() -> {
+                    User newUser = new User(
+                            email,
+                            name,
+                            lastName,
+                            "", // Phone number is empty for Google users
+                            UUID.randomUUID().toString(), // Random password for Google users
+                            "ROLE_USER"
+                    );
+                    return userRepository.save(newUser);
+                });
+    }
 
 }
