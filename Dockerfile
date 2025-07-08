@@ -1,17 +1,18 @@
-# Use an official Maven image with Java 17 (adjust version if needed)
-FROM maven:3.9.3-eclipse-temurin-21
+# Use Maven to build the application
+FROM maven:3.9.10-eclipse-temurin-21-alpine AS build
 
-# Set working directory inside the container
 WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# Copy all files from your local project into the container
-COPY . .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Make the Maven wrapper executable (optional if you want to use it)
-RUN chmod +x ./mvnw
+# Use OpenJDK to run the application
+FROM openjdk:21-alpine
 
-# Build the Spring Boot app (creates the jar file)
-RUN ./mvnw clean install
+WORKDIR /app
+COPY --from=build /app/target/your-app.jar app.jar
 
-# Run the Spring Boot jar (change 'your-app.jar' to your actual jar file name)
-CMD ["java", "-jar", "target/your-app.jar"]
+EXPOSE 8080
+CMD ["java", "-jar", "app.jar"]
