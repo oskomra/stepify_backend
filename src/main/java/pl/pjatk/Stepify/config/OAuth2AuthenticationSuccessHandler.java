@@ -14,7 +14,8 @@ import pl.pjatk.Stepify.user.dto.AuthResponseDTO;
 import pl.pjatk.Stepify.user.dto.UserDTO;
 import pl.pjatk.Stepify.user.model.User;
 import pl.pjatk.Stepify.user.service.JWTService;
-import pl.pjatk.Stepify.user.service.UserService;
+import pl.pjatk.Stepify.user.service.OAuth2UserService;
+import pl.pjatk.Stepify.user.mapper.UserMapper;
 
 import java.io.IOException;
 import java.util.Map;
@@ -24,7 +25,8 @@ import java.util.Map;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JWTService jwtService;
-    private final UserService userService;
+    private final OAuth2UserService oAuth2UserService;
+    private final UserMapper userMapper;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -38,7 +40,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String lastName = (String) attributes.get("family_name");
 
         // Check if user exists, if not create new user
-        User user = userService.findOrCreateGoogleUser(email, name, lastName);
+        User user = oAuth2UserService.findOrCreateGoogleUser(email, name, lastName);
 
         // Generate JWT token
         String token = jwtService.generateToken(email);
@@ -54,11 +56,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         response.addHeader("Set-Cookie", cookie.toString());
 
         // Create response DTO
-        UserDTO userDTO = userService.getUserDTO();
+        UserDTO userDTO = userMapper.userToUserDTO(user);
         AuthResponseDTO authResponse = new AuthResponseDTO(token, userDTO);
 
         // Redirect to frontend with token
-        String redirectUrl = "/oauth2/redirect?token=" + token;
+        String redirectUrl = "http://localhost:3000/oauth2/login/google?token=" + token;
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 } 

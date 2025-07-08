@@ -4,10 +4,8 @@ import org.mapstruct.*;
 import pl.pjatk.Stepify.product.dto.productSize.ProductSizeCreateDTO;
 import pl.pjatk.Stepify.product.dto.productSize.ProductSizeDTO;
 import pl.pjatk.Stepify.product.dto.productSize.ProductSizeUpdateDTO;
-import pl.pjatk.Stepify.product.model.ProductColor;
 import pl.pjatk.Stepify.product.model.ProductSize;
 
-import java.util.List;
 
 @Mapper(componentModel = "spring",
         uses = {ProductColorMapper.class, ProductMapper.class},

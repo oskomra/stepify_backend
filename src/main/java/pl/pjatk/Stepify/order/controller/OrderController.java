@@ -1,10 +1,13 @@
 package pl.pjatk.Stepify.order.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.pjatk.Stepify.order.dto.OrderDTO;
 import pl.pjatk.Stepify.order.dto.OrderSummaryDTO;
+import pl.pjatk.Stepify.order.dto.OrderStatusUpdateDTO;
+import pl.pjatk.Stepify.order.dto.OrderCancellationDTO;
 import pl.pjatk.Stepify.order.service.OrderService;
 
 import java.util.List;
@@ -40,5 +43,18 @@ public class OrderController {
     @GetMapping("/order/{id}")
     public ResponseEntity<OrderDTO> getOrder(@PathVariable long id) {
         return ResponseEntity.ok(orderService.getOrderById(id));
+    }
+
+    @PatchMapping("/order/status/{id}")
+    public ResponseEntity<OrderDTO> updateOrderStatus(
+            @PathVariable long id,
+            @Valid @RequestBody OrderStatusUpdateDTO statusUpdateDTO) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(id, statusUpdateDTO));
+    }
+
+    @PostMapping("/order/cancel/{id}")
+    public ResponseEntity<OrderDTO> cancelOrder(
+            @PathVariable long id) {
+        return ResponseEntity.ok(orderService.cancelOrder(id));
     }
 }

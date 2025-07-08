@@ -43,7 +43,7 @@ public class UserService {
                     userDTO.getLastName(),
                     userDTO.getPhone(),
                     passwordEncoder.encode(userDTO.getPassword()),
-                    "ROLE_ADMIN"
+                    "ROLE_USER"
             );
             userRepository.save(user);
         } else {
@@ -139,21 +139,6 @@ public class UserService {
         } else {
             userRepository.deleteById(id);
         }
-    }
-
-    public User findOrCreateGoogleUser(String email, String name, String lastName) {
-        return userRepository.findUserByEmail(email)
-                .orElseGet(() -> {
-                    User newUser = new User(
-                            email,
-                            name,
-                            lastName,
-                            "", // Phone number is empty for Google users
-                            UUID.randomUUID().toString(), // Random password for Google users
-                            "ROLE_USER"
-                    );
-                    return userRepository.save(newUser);
-                });
     }
 
 }

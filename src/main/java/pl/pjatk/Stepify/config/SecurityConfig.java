@@ -19,7 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.OAuth2AuthenticationSuccessHandler;
+
 
 
 @Configuration
@@ -57,9 +57,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(endpoint -> endpoint
-                                .baseUri("/oauth2/authorize"))
+                                .baseUri("/oauth2/authorization"))  // Match the frontend GoogleLoginButton URL
                         .redirectionEndpoint(endpoint -> endpoint
-                                .baseUri("/oauth2/callback/*"))
+                                .baseUri("/login/oauth2/code/*"))   // Match Google Console and application.properties
                         .successHandler(oAuth2AuthenticationSuccessHandler))
                 .cors(Customizer.withDefaults())
                 .logout(logout -> logout

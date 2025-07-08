@@ -1,9 +1,6 @@
 package pl.pjatk.Stepify.order.mapper;
 
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 import pl.pjatk.Stepify.cart.mapper.CartItemMapper;
 import pl.pjatk.Stepify.order.dto.OrderDTO;
 import pl.pjatk.Stepify.order.dto.OrderSummaryDTO;
@@ -27,7 +24,6 @@ public interface OrderMapper {
 
     @Mapping(source = "user.id",  target = "userId")
     OrderSummaryDTO mapOrderToOrderSummaryDTO(Order order);
-
 
     @AfterMapping
     default void setOrderItemReferences(@MappingTarget Order order) {
