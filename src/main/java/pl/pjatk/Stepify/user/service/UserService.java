@@ -64,9 +64,9 @@ public class UserService {
 
             ResponseCookie cookie = ResponseCookie.from("token", token)
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(true)
                    .path("/")
-                   .sameSite("Lax")
+                   .sameSite("None")
                     .maxAge(24 * 60 * 60)
                  .build();
             response.addHeader("Set-Cookie", cookie.toString());
@@ -87,9 +87,9 @@ public class UserService {
     public void logout(HttpServletResponse response) {
         ResponseCookie deleteCookie = ResponseCookie.from("token", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
-                .sameSite("Lax")
+                .sameSite("None")
                 .maxAge(0)
                 .build();
         response.addHeader("Set-Cookie", deleteCookie.toString());
