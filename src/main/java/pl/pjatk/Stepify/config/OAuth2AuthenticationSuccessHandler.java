@@ -48,9 +48,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         // Set JWT token in cookie
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
-                .sameSite("Lax")
+                .sameSite("None")
                 .maxAge(24 * 60 * 60)
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
@@ -60,7 +60,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         AuthResponseDTO authResponse = new AuthResponseDTO(token, userDTO);
 
         // Redirect to frontend with token
-        String redirectUrl = "http://localhost:3000/oauth2/login/google?token=" + token;
+        String redirectUrl = "https://stepify-frontend.vercel.app/oauth2/login/google";
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 } 
