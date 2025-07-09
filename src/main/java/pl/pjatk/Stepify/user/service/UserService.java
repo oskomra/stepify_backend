@@ -43,7 +43,7 @@ public class UserService {
                     userDTO.getLastName(),
                     userDTO.getPhone(),
                     passwordEncoder.encode(userDTO.getPassword()),
-                    "ROLE_USER"
+                    "ROLE_ADMIN"
             );
             userRepository.save(user);
         } else {
