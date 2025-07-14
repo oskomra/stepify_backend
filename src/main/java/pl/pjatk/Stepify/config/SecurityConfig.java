@@ -67,9 +67,9 @@ public class SecurityConfig {
                         .logoutSuccessHandler((request, response, authentication) -> {
                             ResponseCookie deleteCookie = ResponseCookie.from("token", "")
                                     .httpOnly(true)
-                                    .secure(false)
+                                    .secure(true)
                                     .path("/")
-                                    .sameSite("Lax")
+                                    .sameSite("None")
                                     .maxAge(0)
                                     .build();
                             response.addHeader("Set-Cookie", deleteCookie.toString());
