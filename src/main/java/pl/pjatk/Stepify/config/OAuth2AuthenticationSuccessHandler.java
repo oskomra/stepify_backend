@@ -60,7 +60,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         AuthResponseDTO authResponse = new AuthResponseDTO(token, userDTO);
 
         // Redirect to frontend with token
-        String redirectUrl = "https://stepify-frontend.vercel.app/oauth2/login/google";
+        String redirectUrl = "https://stepify-frontend.onrender.com/oauth2/login/google";
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 } 
