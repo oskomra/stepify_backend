@@ -38,7 +38,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/register").permitAll()
                         .requestMatchers(("/login")).permitAll()
-                        .requestMatchers(("/api/login")).permitAll()
                         .requestMatchers(("/logout")).permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers(("/products/**")).permitAll()

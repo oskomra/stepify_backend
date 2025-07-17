@@ -25,7 +25,7 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/api/login")
+    @PostMapping("/login")
     ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
 
         return ResponseEntity.ok(userService.authenticate(loginRequestDTO, response));
