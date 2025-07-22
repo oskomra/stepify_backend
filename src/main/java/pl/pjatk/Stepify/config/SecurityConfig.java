@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/orders/**").permitAll()
                         .requestMatchers("/payment").hasRole("USER")
                         .requestMatchers("/promotions/**").permitAll()
+                        .requestMatchers("/images/**").permitAll()
                         .anyRequest().authenticated())
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(endpoint -> endpoint

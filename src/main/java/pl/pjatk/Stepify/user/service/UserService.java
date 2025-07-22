@@ -65,8 +65,8 @@ public class UserService {
             ResponseCookie cookie = ResponseCookie.from("token", token)
                     .httpOnly(true)
                     .secure(true)
-                   .path("/")
-                   .sameSite("None")
+                    .path("/")
+                    .sameSite("None")
                     .maxAge(24 * 60 * 60)
                  .build();
             response.addHeader("Set-Cookie", cookie.toString());
