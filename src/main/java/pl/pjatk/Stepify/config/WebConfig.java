@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         // Configure CORS for all endpoints
         registry.addMapping("/**")  // Apply to all endpoints
-                .allowedOrigins("https://stepify-frontend.onrender.com")
+                .allowedOrigins("https://stepify-frontend.vercel.app")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")  // Specify allowed HTTP methods
                 .allowedHeaders("*")
                 .allowCredentials(true)
